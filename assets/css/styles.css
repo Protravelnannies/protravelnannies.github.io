@@ -497,3 +497,8 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--s
 .nmap-example { margin-left: auto; align-self: flex-start; font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; background: var(--blush-soft); color: var(--sage-deep); padding: .25rem .55rem; border-radius: var(--pill); white-space: nowrap; }
 .nmap-nanny .badge { font-size: .78rem; padding: .3rem .65rem; }
 @media (min-width: 901px) { .nmap-stage { position: sticky; top: 100px; } }
+
+/* Languages section on the homepage */
+.lang-cloud { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: .7rem; justify-content: center; }
+.lang-cloud li { font-family: var(--display); font-size: clamp(1.05rem, 2vw, 1.35rem); color: var(--sage-deep); background: var(--surface); border: 1px solid var(--line); border-radius: var(--pill); padding: .6rem 1.2rem; box-shadow: 0 2px 10px rgba(52, 61, 47, .05); }
+.lang-cloud li:nth-child(3n+1) { background: var(--sage-deep); color: var(--cream); border-color: var(--sage-deep); }
