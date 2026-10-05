@@ -1,0 +1,3 @@
+# Pre-launch: ask search engines not to crawl the site. Replace with "Allow: /" at launch.
+User-agent: *
+Disallow: /
