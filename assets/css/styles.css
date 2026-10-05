@@ -420,7 +420,7 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--s
 @media print { .wa-bubble { display: none; } }
 
 /* ---------- Social icons (footer) ---------- */
-.social { display: flex; gap: .6rem; margin-top: 1.2rem; }
+.social { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1.2rem; }
 .social a {
   width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center;
   border: 1px solid rgba(252, 247, 241, .35); color: var(--cream); transition: background .2s, color .2s, border-color .2s;
