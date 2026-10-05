@@ -516,11 +516,11 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--s
 }
 .social-bar-icons a:hover, .social-bar-icons a:focus-visible { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(52, 61, 47, .18); text-decoration: none; }
 .social-bar-icons svg { width: 18px; height: 18px; }
-.sb-instagram { background: var(--blush); color: var(--sage-deep); }
-.sb-facebook  { background: var(--sage); color: var(--cream); }
-.sb-tiktok    { background: var(--ink); color: var(--cream); }
-.sb-threads   { background: var(--gold); color: var(--ink); }
-.sb-youtube   { background: #B9705F; color: var(--cream); } /* deepened blush */
+.sb-instagram { background: #DE9E8E; color: var(--white); } /* blush, deepened so white shows */
+.sb-facebook  { background: var(--sage); color: var(--white); }
+.sb-tiktok    { background: var(--ink); color: var(--white); }
+.sb-threads   { background: var(--gold); color: var(--white); }
+.sb-youtube   { background: #B9705F; color: var(--white); } /* deepened blush */
 @media (max-width: 760px) {
   .social-bar-inner { justify-content: center; }
   .social-bar-label { font-size: .82rem; }
