@@ -502,3 +502,29 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--s
 .lang-cloud { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: .7rem; justify-content: center; }
 .lang-cloud li { font-family: var(--display); font-size: clamp(1.05rem, 2vw, 1.35rem); color: var(--sage-deep); background: var(--surface); border: 1px solid var(--line); border-radius: var(--pill); padding: .6rem 1.2rem; box-shadow: 0 2px 10px rgba(52, 61, 47, .05); }
 .lang-cloud li:nth-child(3n+1) { background: var(--sage-deep); color: var(--cream); border-color: var(--sage-deep); }
+
+/* ---------- Social bar (top of every page) ---------- */
+.social-bar { background: var(--blush-soft); border-bottom: 1px solid var(--line); }
+.social-bar-inner { display: flex; align-items: center; justify-content: flex-end; gap: .9rem; min-height: 46px; padding-block: .35rem; }
+.social-bar .wrap { max-width: 1380px; }
+.social-bar-label { margin: 0; font-size: .9rem; color: var(--muted); }
+.social-bar-label strong { color: var(--sage-deep); font-weight: 600; }
+.social-bar-icons { display: flex; gap: .45rem; }
+.social-bar-icons a {
+  width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center;
+  box-shadow: 0 1px 2px rgba(52, 61, 47, .12); transition: transform .2s, box-shadow .2s;
+}
+.social-bar-icons a:hover, .social-bar-icons a:focus-visible { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(52, 61, 47, .18); text-decoration: none; }
+.social-bar-icons svg { width: 18px; height: 18px; }
+.sb-instagram { background: var(--blush); color: var(--sage-deep); }
+.sb-facebook  { background: var(--sage); color: var(--cream); }
+.sb-tiktok    { background: var(--ink); color: var(--cream); }
+.sb-threads   { background: var(--gold); color: var(--ink); }
+.sb-youtube   { background: #B9705F; color: var(--cream); } /* deepened blush */
+@media (max-width: 760px) {
+  .social-bar-inner { justify-content: center; }
+  .social-bar-label { font-size: .82rem; }
+}
+@media (max-width: 400px) { .social-bar-label { display: none; } }
+@media (prefers-reduced-motion: reduce) { .social-bar-icons a { transition: none; } .social-bar-icons a:hover { transform: none; } }
+@media print { .social-bar { display: none; } }
