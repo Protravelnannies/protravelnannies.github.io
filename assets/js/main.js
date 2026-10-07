@@ -92,8 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Forms: client-side validation + confirmation state.
-  // TODO before launch: connect each form to the CRM / form service (set the form's
-  // data-endpoint attribute) so submissions are actually delivered.
+  // Each form posts to Web3Forms (data-endpoint), which emails cameron@protravelnannies.com.
   document.querySelectorAll('form[data-form]').forEach(form => {
     form.addEventListener('submit', async e => {
       e.preventDefault();
@@ -103,15 +102,24 @@ document.addEventListener('DOMContentLoaded', () => {
       if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
       try {
         if (endpoint) {
-          const res = await fetch(endpoint, { method: 'POST', body: new FormData(form), headers: { Accept: 'application/json' } });
-          if (!res.ok) throw new Error('Request failed');
+          // Join multi-select checkboxes into one line so every choice arrives in the email
+          const data = {};
+          new FormData(form).forEach((value, key) => {
+            data[key] = key in data ? data[key] + ', ' + value : value;
+          });
+          const who = data.name || [data.first_name, data.last_name].filter(Boolean).join(' ');
+          if (data.subject && who) data.subject += ' from ' + who;
+          if (data.email) data.replyto = data.email;
+          const res = await fetch(endpoint, { method: 'POST', body: JSON.stringify(data), headers: { 'Content-Type': 'application/json', Accept: 'application/json' } });
+          const json = await res.json().catch(() => ({}));
+          if (!res.ok || json.success === false) throw new Error('Request failed');
         }
         const success = document.getElementById(form.dataset.success);
         form.hidden = true;
         if (success) { success.hidden = false; success.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
       } catch (err) {
         if (btn) { btn.disabled = false; btn.textContent = 'Try again'; }
-        alert('Sorry, something went wrong sending your form. Please email us instead.');
+        alert('Sorry, something went wrong sending your form. Please email us at cameron@protravelnannies.com instead.');
       }
     });
   });
