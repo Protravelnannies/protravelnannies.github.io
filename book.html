@@ -95,8 +95,8 @@
       </aside>
 
       <div>
-        <!-- TODO before launch: add data-endpoint="..." pointing at the form service / CRM so requests are delivered. -->
-        <form class="form" data-form data-success="book-success" data-endpoint="https://api.web3forms.com/submit">
+        <!-- Requests go to Web3Forms (email) and to the Booking Tracker sheet (data-sheet, Apps Script web app in ../booking-tracker/). -->
+        <form class="form" data-form data-success="book-success" data-endpoint="https://api.web3forms.com/submit" data-sheet="https://script.google.com/macros/s/AKfycbw6Ju0GJo18rcTRX_Yn7TPyN5zg4b91tSeDtIvntGWgdAsgRi9jhKPjZlIRfZzcPYw/exec">
               <input type="hidden" name="access_key" value="645b3551-d19e-4c80-a6a0-7ff355bc1f03">
               <input type="hidden" name="subject" value="New booking request">
               <input type="hidden" name="from_name" value="Pro Travel Nannies website">
