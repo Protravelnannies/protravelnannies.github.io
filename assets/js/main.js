@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Forms: client-side validation + confirmation state.
-  // Each form posts to Web3Forms (data-endpoint), which emails hello@protravelnannies.com.
+  // Each form posts to Web3Forms (data-endpoint), which emails the address the access key was registered to (hello@protravelnannies.com, the same inbox as cameron@).
   document.querySelectorAll('form[data-form]').forEach(form => {
     form.addEventListener('submit', async e => {
       e.preventDefault();
@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (success) { success.hidden = false; success.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
       } catch (err) {
         if (btn) { btn.disabled = false; btn.textContent = 'Try again'; }
-        alert('Sorry, something went wrong sending your form. Please email us at hello@protravelnannies.com instead.');
+        alert('Sorry, something went wrong sending your form. Please email us at cameron@protravelnannies.com instead.');
       }
     });
   });
