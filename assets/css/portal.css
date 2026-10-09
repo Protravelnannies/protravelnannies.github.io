@@ -1,0 +1,58 @@
+/* Account portal (login.html, account.html). Builds on styles.css. */
+.portal-narrow { max-width: 560px; }
+.portal-msg { margin: 1rem 0 0; color: var(--muted); }
+.portal-msg:empty { display: none; }
+.portal-msg.error { color: #9A3B2A; }
+.portal-msg.ok { color: var(--sage-deep); }
+
+.portal-head { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between; margin-bottom: 1.6rem; }
+.portal-head h1 { font-size: clamp(1.8rem, 4vw, 2.5rem); margin: 0; }
+.portal-head .tabs { margin-top: .6rem; }
+.portal-panel { display: grid; gap: 1.4rem; }
+.portal-panel > h2 { font-size: 1.5rem; margin: .6rem 0 0; }
+
+.bk { display: grid; gap: 1rem; }
+.bk-top { display: flex; flex-wrap: wrap; gap: .6rem 1rem; align-items: baseline; justify-content: space-between; }
+.bk-date { font-family: var(--display); font-size: 1.35rem; color: var(--sage-deep); margin: 0; }
+.status { display: inline-block; font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; padding: .25rem .7rem; border-radius: var(--pill); background: var(--sage-soft); color: var(--sage-deep); }
+.status.Enquiry { background: var(--blush-soft); color: var(--ink); }
+.status.Cancelled { background: #EEE; color: var(--muted); }
+.bk dl { display: grid; grid-template-columns: max-content 1fr; gap: .35rem 1rem; margin: 0; }
+.bk dt { color: var(--muted); font-size: .92rem; }
+.bk dd { margin: 0; white-space: pre-line; }
+.bk-box { background: var(--cream); border-radius: var(--radius-sm); padding: 1rem 1.1rem; }
+.bk-box h3 { font-size: 1.05rem; margin: 0 0 .5rem; }
+
+.person { display: flex; gap: 1rem; align-items: flex-start; }
+.person img { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; flex: none; background: var(--sage-soft); }
+.person p { margin: .2rem 0; }
+
+.updates { list-style: none; padding: 0; margin: 0; display: grid; gap: .6rem; }
+.updates li { border-left: 3px solid var(--blush); padding: .2rem 0 .2rem .8rem; }
+.updates .meta { font-size: .85rem; color: var(--muted); }
+.updates button { margin-top: .4rem; }
+
+.inline-form { display: grid; gap: .8rem; }
+.inline-form .row { display: grid; gap: .8rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr)); }
+.btn-small { min-height: 40px; padding: .45rem 1rem; font-size: .92rem; }
+.link-btn { background: none; border: 0; padding: 0; font: inherit; color: var(--sage-deep); text-decoration: underline; cursor: pointer; }
+
+.cal { display: grid; gap: .8rem; }
+.cal-nav { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.cal-nav h3 { margin: 0; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: .3rem; }
+.cal-grid .dow { font-size: .78rem; text-align: center; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.cal-day { aspect-ratio: 1; border-radius: var(--radius-sm); background: var(--white); border: 1px solid var(--line); display: flex; align-items: flex-start; justify-content: flex-end; padding: .3rem .4rem; font-size: .88rem; }
+.cal-day.out { visibility: hidden; }
+.cal-day.today { border-color: var(--gold); border-width: 2px; }
+.cal-day.booked { background: var(--sage-deep); color: var(--cream); border-color: var(--sage-deep); }
+.cal-day.away { background: var(--blush); border-color: var(--blush); }
+.cal-day.free { background: var(--sage-soft); border-color: var(--sage-soft); }
+.cal-key { display: flex; flex-wrap: wrap; gap: .4rem 1.2rem; font-size: .88rem; color: var(--muted); }
+.cal-key span::before { content: ""; display: inline-block; width: .9em; height: .9em; border-radius: 3px; margin-right: .4rem; vertical-align: -1px; }
+.cal-key .k-booked::before { background: var(--sage-deep); }
+.cal-key .k-away::before { background: var(--blush); }
+.cal-key .k-free::before { background: var(--sage-soft); border: 1px solid var(--line); }
+
+.portal table td, .portal table th { vertical-align: top; }
+.empty { color: var(--muted); font-style: italic; }
