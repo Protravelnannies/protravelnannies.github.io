@@ -528,3 +528,6 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--s
 @media (max-width: 400px) { .social-bar-label { display: none; } }
 @media (prefers-reduced-motion: reduce) { .social-bar-icons a { transition: none; } .social-bar-icons a:hover { transform: none; } }
 @media print { .social-bar { display: none; } }
+.social-bar-login { font-size: .9rem; font-weight: 500; color: var(--sage-deep); padding: .35rem .9rem; border: 1.5px solid var(--sage); border-radius: var(--pill); background: var(--white); text-decoration: none; }
+.social-bar-login:hover, .social-bar-login:focus-visible { background: var(--sage-deep); border-color: var(--sage-deep); color: var(--cream); text-decoration: none; }
+@media (max-width: 560px) { .social-bar-inner { flex-wrap: wrap; row-gap: .4rem; } .social-bar-login { padding: .3rem .8rem; } }

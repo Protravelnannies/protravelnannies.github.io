@@ -56,3 +56,58 @@
 
 .portal table td, .portal table th { vertical-align: top; }
 .empty { color: var(--muted); font-style: italic; }
+
+/* ---- v2: dashboards, profiles, money ---- */
+.portal > .wrap > div > .tabs { margin-bottom: 1.6rem; max-width: 100%; overflow-x: auto; flex-wrap: nowrap; }
+.tabs button { white-space: nowrap; }
+.tab-count { display: inline-grid; place-items: center; min-width: 1.4em; height: 1.4em; margin-left: .45rem; padding: 0 .35em; border-radius: var(--pill); background: var(--blush); color: var(--ink); font-size: .78rem; font-weight: 600; }
+.pre { white-space: pre-line; }
+
+.stat-row { display: grid; gap: .8rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr)); }
+.stat { display: grid; gap: .2rem; text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 1rem 1.2rem; font: inherit; color: inherit; cursor: pointer; }
+button.stat:hover { border-color: var(--sage); }
+.stat-value { font-family: var(--display); font-size: 1.7rem; color: var(--sage-deep); line-height: 1.1; }
+.stat-label { font-size: .88rem; color: var(--muted); }
+
+.bk-service { margin: 0; font-size: .8rem; letter-spacing: .12em; text-transform: uppercase; color: var(--sage); }
+.bk.offer { border: 2px solid var(--blush); }
+.facts { display: grid; gap: .6rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 130px), 1fr)); }
+.facts div { background: var(--sage-soft); border-radius: var(--radius-sm); padding: .6rem .8rem; display: grid; }
+.facts span { font-size: .8rem; color: var(--muted); }
+.bk-box.pay { background: var(--blush-soft); }
+.kids { display: grid; gap: .6rem; margin: .8rem 0; }
+.kid { background: var(--white); border-radius: var(--radius-sm); padding: .7rem .9rem; }
+.kid p { margin: 0 0 .3rem; }
+.nanny-card + .nanny-card { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--line); }
+.nanny-card details { margin-top: .6rem; }
+.review-form { background: var(--sage-soft); }
+
+.avatar { border-radius: 50%; object-fit: cover; flex: none; background: var(--sage-soft); }
+.avatar.placeholder { display: inline-grid; place-items: center; font-family: var(--display); font-size: 1.4rem; color: var(--sage-deep); }
+.person { display: flex; gap: 1rem; align-items: flex-start; }
+.profile-view { display: grid; gap: 1rem; }
+.profile-video { width: 100%; max-width: 480px; border-radius: var(--radius-sm); background: #000; }
+.gallery { display: grid; gap: .5rem; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
+.gallery img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: var(--radius-sm); }
+.gallery figure { margin: 0; display: grid; gap: .3rem; justify-items: start; }
+.media-card .gallery { margin-bottom: 1rem; }
+.file-btn { position: relative; overflow: hidden; }
+.visually-hidden-file { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
+.file-btn:focus-within { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+.completeness .meter { height: 10px; border-radius: var(--pill); background: var(--sage-soft); overflow: hidden; }
+.completeness .meter span { display: block; height: 100%; background: var(--sage-deep); border-radius: var(--pill); }
+
+.stars { color: var(--gold); letter-spacing: .05em; }
+.review-summary { margin: .3rem 0 0; font-size: .92rem; }
+.reviews { list-style: none; padding: 0; margin: 0; display: grid; gap: .8rem; }
+.reviews li { border-left: 3px solid var(--gold); padding-left: .8rem; }
+.reviews p { margin: .3rem 0 0; }
+.reviews .meta { font-size: .85rem; color: var(--muted); }
+
+.team { display: grid; gap: .8rem; }
+.team-row { background: var(--cream); border-radius: var(--radius-sm); padding: .8rem; }
+.portal details > summary { cursor: pointer; color: var(--sage-deep); font-weight: 500; }
+.portal fieldset .row { grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr)); }
+input[type="password"] { width: 100%; font: inherit; font-size: 1rem; color: var(--ink); background: var(--white); border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: .8rem .95rem; min-height: 48px; }
+.portal > .wrap > div > .tabs { display: flex; width: max-content; }
