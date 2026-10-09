@@ -5,14 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <!-- Pre-launch: ask search engines not to list the site. Remove this line at launch. -->
 <meta name="robots" content="noindex, nofollow">
-<title>Find a Nanny Near You | Europe Nanny Map | Pro Travel Nannies</title>
-<meta name="description" content="Explore our Europe nanny map: tap a destination in Spain, the Balearic Islands, Portugal, France or Germany to see trusted, English-speaking and multilingual nannies in that area.">
-<meta property="og:title" content="Find a nanny near you | Pro Travel Nannies">
-<meta property="og:description" content="Tap a pin on our Europe map to meet trusted nannies where you're travelling.">
+<title>Create an Account | Pro Travel Nannies</title>
+<meta name="description" content="Create your free Pro Travel Nannies account as a family or a nanny.">
+<meta property="og:title" content="Create an Account | Pro Travel Nannies">
+<meta property="og:description" content="See your upcoming bookings, hours and notes in one place.">
 <meta property="og:image" content="assets/img/logo.png">
 <link rel="icon" href="assets/img/logo-192.png">
 <link rel="stylesheet" href="assets/css/fonts.css">
 <link rel="stylesheet" href="assets/css/styles.css?v=7">
+<link rel="stylesheet" href="assets/css/portal.css?v=3">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -68,49 +69,57 @@
 <main id="main">
   <section class="page-hero">
     <div class="wrap">
-      <p class="breadcrumb"><a href="index.html">Home</a> / Find a nanny near you</p>
-      <p class="eyebrow left">For families</p>
-      <h1>Where are you off to? Let's find you a nanny there.</h1>
-      <p class="lead">Tap a pin to see the English-speaking and multilingual nannies we trust in that area. They're spread from the Costa del Sol and the Balearic Islands up to Lisbon, Paris and Berlin.</p>
+      <p class="breadcrumb"><a href="index.html">Home</a> / Create an account</p>
+      <p class="eyebrow left">Join Pro Travel Nannies</p>
+      <h1>Create your free account.</h1>
+      <p class="lead">Families: keep your bookings, payments and your children's details in one place. Nannies: build your profile with photos and an intro video, set your availability and receive booking offers.</p>
     </div>
   </section>
 
-  <section class="section" aria-label="Europe nanny map">
-    <div class="wrap">
-      <div data-nanny-map></div>
-      <noscript><p class="note">The map needs JavaScript to work, but you can still <a href="book.html">request childcare</a> for any destination.</p></noscript>
-    </div>
-  </section>
-
-  <section class="section sage" aria-labelledby="map-how-h">
-    <div class="wrap">
-      <div class="section-head center">
-        <p class="eyebrow">How it works</p>
-        <h2 id="map-how-h">How you get from a pin to a nanny</h2>
+  <section class="section tight">
+    <div class="wrap portal-narrow">
+      <div class="card" data-portal-signup>
+        <form class="form" novalidate>
+          <div class="field">
+            <span class="label" id="su-role-l">I am…</span>
+            <div class="role-pick" role="radiogroup" aria-labelledby="su-role-l">
+              <label class="role-option"><input type="radio" name="role" value="family" required><span><strong>A family</strong><small>Looking for childcare</small></span></label>
+              <label class="role-option"><input type="radio" name="role" value="nanny" required><span><strong>A nanny</strong><small>Looking for work</small></span></label>
+            </div>
+          </div>
+          <div class="field">
+            <label for="su-name">Full name</label>
+            <input id="su-name" name="full_name" type="text" autocomplete="name" required maxlength="120">
+          </div>
+          <div class="field">
+            <label for="su-email">Email</label>
+            <input id="su-email" name="email" type="email" autocomplete="email" required>
+          </div>
+          <div class="field">
+            <label for="su-phone">Mobile number (with country code)</label>
+            <input id="su-phone" name="phone" type="tel" autocomplete="tel" placeholder="+44 7700 900000">
+          </div>
+          <div class="field">
+            <label for="su-pw">Create a password</label>
+            <input id="su-pw" name="password" type="password" autocomplete="new-password" required minlength="10">
+            <span class="hint">At least 10 characters, with letters and numbers. A short phrase you'll remember works well.</span>
+          </div>
+          <div class="field">
+            <label for="su-pw2">Type it again</label>
+            <input id="su-pw2" name="password2" type="password" autocomplete="new-password" required>
+          </div>
+          <label class="consent"><input type="checkbox" name="consent" value="yes" required><span>I agree to the <a href="terms.html">terms</a> and the <a href="privacy.html">privacy policy</a>.</span></label>
+          <p class="small muted nanny-only" hidden style="margin:0">Nannies: you can build your profile straight away. Before you can be offered bookings, we'll check your details, interview you and verify your documents.</p>
+          <button class="btn btn-primary" type="submit">Create my account</button>
+        </form>
+        <div data-done hidden>
+          <h2 style="font-size:1.5rem;margin-top:0">Check your email</h2>
+          <p>We've sent a link to <strong data-sent-to></strong>. Click it to confirm your email and you'll go straight to your new account.</p>
+          <p class="small muted" style="margin:0">Nothing after a few minutes? Check your spam folder, or <a href="login.html">go to the log in page</a> and choose "First time here".</p>
+        </div>
+        <p class="portal-msg" role="status" aria-live="polite" data-msg></p>
       </div>
-      <div class="grid three">
-        <div class="card reveal"><span class="num">01</span><h3>Choose your destination</h3><p class="muted">Tap a pin to see who's in that area, what languages they speak, their experience and what's been verified.</p></div>
-        <div class="card reveal"><span class="num">02</span><h3>Send your request</h3><p class="muted">Tell us your dates and a bit about your children. A real person reads each request.</p></div>
-        <div class="card reveal"><span class="num">03</span><h3>Meet your match</h3><p class="muted">We'll match you with a nanny who suits your family, and you'll see their full profile before you confirm. You're not charged anything until you do.</p></div>
-      </div>
-      <p class="center" style="margin-top:2rem"><a class="text-link" href="how-it-works.html">See the full booking process</a></p>
-    </div>
-  </section>
-
-  <section class="section tight" aria-label="Get started">
-    <div class="wrap cta-band">
-      <div class="cta-card family reveal">
-        <p class="eyebrow left" style="color:var(--blush)">For families</p>
-        <h3>Travelling somewhere not on the map?</h3>
-        <p>Tell us where you're going and when, and we'll be honest about what we can arrange.</p>
-        <a class="btn btn-light" href="book.html">Find childcare</a>
-      </div>
-      <div class="cta-card nanny reveal">
-        <p class="eyebrow left">For nannies</p>
-        <h3>Want to be on the map?</h3>
-        <p>Join a childcare network where bookings are fair, the families are international and trust goes both ways.</p>
-        <a class="btn btn-primary" href="for-nannies.html">Join as a nanny</a>
-      </div>
+      <p class="small muted" style="margin-top:1.5rem">Already have an account? <a href="login.html">Log in</a>.</p>
     </div>
   </section>
 </main>
@@ -193,8 +202,9 @@
 </div>
 <!-- ============ /FOOTER ============ -->
 
-<script src="assets/js/nanny-data.js?v=5"></script>
-<script src="assets/js/nanny-map.js?v=5"></script>
 <script src="assets/js/main.js?v=5"></script>
+<script src="assets/js/vendor/supabase.js"></script>
+<script src="assets/js/portal-config.js?v=1"></script>
+<script src="assets/js/portal.js?v=3"></script>
 </body>
 </html>

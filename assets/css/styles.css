@@ -531,3 +531,6 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--s
 .social-bar-login { font-size: .9rem; font-weight: 500; color: var(--sage-deep); padding: .35rem .9rem; border: 1.5px solid var(--sage); border-radius: var(--pill); background: var(--white); text-decoration: none; }
 .social-bar-login:hover, .social-bar-login:focus-visible { background: var(--sage-deep); border-color: var(--sage-deep); color: var(--cream); text-decoration: none; }
 @media (max-width: 560px) { .social-bar-inner { flex-wrap: wrap; row-gap: .4rem; } .social-bar-login { padding: .3rem .8rem; } }
+.social-bar-account { display: inline-flex; gap: .4rem; }
+.social-bar-login.signup { background: var(--sage-deep); border-color: var(--sage-deep); color: var(--cream); }
+.social-bar-login.signup:hover, .social-bar-login.signup:focus-visible { background: var(--ink); border-color: var(--ink); }

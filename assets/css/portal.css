@@ -111,3 +111,12 @@ button.stat:hover { border-color: var(--sage); }
 .portal fieldset .row { grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr)); }
 input[type="password"] { width: 100%; font: inherit; font-size: 1rem; color: var(--ink); background: var(--white); border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: .8rem .95rem; min-height: 48px; }
 .portal > .wrap > div > .tabs { display: flex; width: max-content; }
+
+/* ---- sign-up ---- */
+.role-pick { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); gap: .7rem; }
+.role-option { position: relative; }
+.role-option input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+.role-option span { display: grid; gap: .15rem; padding: 1rem 1.1rem; border: 1.5px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--white); cursor: pointer; transition: all .15s; }
+.role-option small { color: var(--muted); font-size: .88rem; }
+.role-option input:checked + span { border-color: var(--sage-deep); background: var(--sage-soft); box-shadow: inset 0 0 0 1px var(--sage-deep); }
+.role-option input:focus-visible + span { outline: 2px solid var(--gold); outline-offset: 2px; }

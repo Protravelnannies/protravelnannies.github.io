@@ -3,10 +3,11 @@
    this file only decides how to show it. */
 (() => {
   const loginRoot = document.querySelector('[data-portal-login]');
+  const signupRoot = document.querySelector('[data-portal-signup]');
   const accountRoot = document.querySelector('[data-portal-account]');
-  if (!loginRoot && !accountRoot) return;
+  if (!loginRoot && !signupRoot && !accountRoot) return;
 
-  const root = loginRoot || accountRoot;
+  const root = loginRoot || signupRoot || accountRoot;
   const msgEl = root.querySelector('[data-msg]');
   const say = (text, kind = '') => { msgEl.textContent = text || ''; msgEl.className = 'portal-msg ' + kind; };
 
@@ -120,6 +121,8 @@
     if (/exceeded the maximum allowed size|payload too large/i.test(m)) return 'That file is too big. Please choose one under 50 MB.';
     if (/password should be|weak password/i.test(m)) return 'Please choose a stronger password: at least 10 characters, mixing letters and numbers.';
     if (/should be different from the old/i.test(m)) return 'Your new password must be different from your old one.';
+    // Our own form checks: show them as plain instructions
+    if (err instanceof Error && !('code' in err) && !('status' in err)) return m.charAt(0).toUpperCase() + m.slice(1);
     return 'Something went wrong: ' + m;
   }
 
@@ -179,8 +182,8 @@
       });
       btn.disabled = false;
       if (error) {
-        if (/database error|not been invited|signups not allowed/i.test(error.message)) {
-          say("We couldn't find an account for that email. Use the email you gave us, or get in touch and we'll set you up.", 'error');
+        if (/database error|not been invited|no pro travel nannies account|signups not allowed/i.test(error.message)) {
+          say("We couldn't find an account for that email. New here? Create a free account on the sign-up page.", 'error');
         } else if (/rate limit|security purposes|too many/i.test(error.message)) {
           say('Too many attempts. Please wait a few minutes and try again.', 'error');
         } else {
@@ -203,6 +206,62 @@
       btn.disabled = false;
       if (error) { say('That code is wrong or has expired. Please try again or request a new one.', 'error'); return; }
       location.replace('account.html');
+    });
+    return;
+  }
+
+  // ---------- Sign-up page ----------
+
+  if (signupRoot) {
+    const form = signupRoot.querySelector('form');
+    const nannyNote = signupRoot.querySelector('.nanny-only');
+    const wanted = new URLSearchParams(location.search).get('role');
+    if (wanted === 'nanny' || wanted === 'family') form.querySelector(`input[name=role][value=${wanted}]`).checked = true;
+    const syncRole = () => { nannyNote.hidden = !form.querySelector('input[name=role][value=nanny]').checked; };
+    form.addEventListener('change', syncRole);
+    syncRole();
+
+    db.auth.getSession().then(({ data }) => { if (data.session) location.replace('account.html'); });
+
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      const f = Object.fromEntries(new FormData(form));
+      const email = (f.email || '').trim().toLowerCase();
+      try {
+        if (!f.role) throw new Error('please choose whether you are a family or a nanny.');
+        if (!blank(f.full_name)) throw new Error('please enter your full name.');
+        if (!/^\S+@\S+\.\S+$/.test(email)) throw new Error('please enter a valid email address.');
+        checkPassword(f);
+        if (!f.consent) throw new Error('please agree to the terms and privacy policy.');
+      } catch (err) { say(niceError(err), 'error'); return; }
+      const btn = form.querySelector('[type=submit]');
+      btn.disabled = true;
+      say('Creating your account…');
+      const { data, error } = await db.auth.signUp({
+        email, password: f.password,
+        options: {
+          emailRedirectTo: new URL('account.html', location.href).href,
+          data: { role: f.role, full_name: f.full_name.trim(), phone: blank(f.phone), password_set: true }
+        }
+      });
+      btn.disabled = false;
+      if (error) {
+        say(/already registered|already exists/i.test(error.message) ? 'You already have an account with this email. Please log in instead.'
+          : /rate limit|too many/i.test(error.message) ? 'Too many sign-ups right now. Please try again in a few minutes.'
+          : /database error/i.test(error.message) ? "Sorry, we couldn't create your account. Please email cameron@protravelnannies.com and we'll set it up for you."
+          : niceError(error), 'error');
+        return;
+      }
+      if (data.user && Array.isArray(data.user.identities) && !data.user.identities.length) {
+        say('You already have an account with this email. Please log in instead.', 'error');
+        return;
+      }
+      if (data.session) { location.replace('account.html'); return; }
+      form.hidden = true;
+      const done = signupRoot.querySelector('[data-done]');
+      done.querySelector('[data-sent-to]').textContent = email;
+      done.hidden = false;
+      say('');
     });
     return;
   }
@@ -609,7 +668,21 @@
       isLive(b) ? familyBox(b) : null, payBox(b), isLive(b) ? updatesBox(b, true) : null);
   }
 
+  function approvalNotice() {
+    if (me.approved !== false) return null;
+    return h('div', { class: 'card blush' },
+      h('h2', { style: 'font-size:1.4rem;margin-top:0' }, 'Welcome! Your profile is waiting for approval'),
+      h('p', {}, "Thanks for joining. Before we can offer you bookings, we check every nanny personally. Here's what happens next:"),
+      h('ol', { class: 'dots' },
+        h('li', {}, h('button', { class: 'link-btn', type: 'button', onclick: () => goTo('profile') }, 'Complete your profile'), ': photo, intro video, bio and experience.'),
+        h('li', {}, 'Send us your ', h('a', { href: 'apply.html' }, 'nanny application'), ' if you haven\'t already.'),
+        h('li', {}, 'We arrange a video interview, check your ID and references, and your sex-offence certificate.'),
+        h('li', {}, "Once you're approved, you'll see booking offers here.")));
+  }
+
   function nannyOverview(panel) {
+    const notice = approvalNotice();
+    if (notice) panel.append(notice);
     const off = offers();
     const upcoming = data.bookings.filter(b => accepted(b) && isLive(b) && !isPast(b)).sort(byDate);
     const rows = Object.values(data.mine).filter(r => r.response === 'accepted');
@@ -738,6 +811,8 @@
     const p = data.profile;
     panel.append(h('h2', {}, 'My profile'));
     if (!p) { panel.append(h('p', { class: 'empty' }, "Your profile hasn't been set up yet. Cameron will add it shortly.")); return; }
+    const notice = approvalNotice();
+    if (notice) panel.append(notice);
     panel.append(h('div', { class: 'card' }, nannyCompleteness()));
 
     // Photo
@@ -907,6 +982,12 @@
   }
 
   function familyOverview(panel) {
+    if (!data.bookings.length) panel.append(h('div', { class: 'card sage' },
+      h('h2', { style: 'font-size:1.4rem;margin-top:0' }, 'Welcome to Pro Travel Nannies!'),
+      h('ol', { class: 'dots' },
+        h('li', {}, h('button', { class: 'link-btn', type: 'button', onclick: () => goTo('family') }, 'Fill in your family profile'), ', including each child, so your nanny knows them before they arrive.'),
+        h('li', {}, h('a', { href: 'book.html' }, 'Tell us what childcare you need'), '. Cameron will personally match you with a nanny.'),
+        h('li', {}, "Your booking, price and your nanny's profile will then appear here."))));
     const upcoming = data.bookings.filter(b => isLive(b) && !isPast(b)).sort(byDate);
     const due = data.bookings.filter(isLive).reduce((s, b) => s + Math.max(0, balanceOf(data.payments[b.id]) || 0), 0);
     panel.append(h('div', { class: 'stat-row' },
@@ -1067,7 +1148,7 @@
 
   function bookingForm(b) {
     const fams = data.peopleList.filter(p => p.role === 'family');
-    const nannies = data.peopleList.filter(p => p.role === 'nanny');
+    const nannies = data.peopleList.filter(p => p.role === 'nanny' && p.approved !== false);
     if (!fams.length) return h('p', { class: 'card' }, 'Add the family on the People tab first.');
     b = b || { status: 'Confirmed', service: SERVICES[0], nannies_needed: 1 };
     const pay = (b.id && data.payments[b.id]) || {};
@@ -1188,13 +1269,15 @@
         field('Email', input('email', p.email, 'email', { required: true }), 'The email they will log in with'),
         field('Phone', input('phone', p.phone, 'tel')),
         field('Role', role)),
-      h('label', { class: 'choice' }, h('input', { type: 'checkbox', name: 'can_log_in', value: 'yes', checked: p.can_log_in }), h('span', {}, 'Can log in')),
+      h('div', { class: 'choices' },
+        h('label', { class: 'choice' }, h('input', { type: 'checkbox', name: 'can_log_in', value: 'yes', checked: p.can_log_in }), h('span', {}, 'Can log in')),
+        h('label', { class: 'choice' }, h('input', { type: 'checkbox', name: 'approved', value: 'yes', checked: p.approved !== false }), h('span', {}, 'Approved (can receive bookings)'))),
       nannyBits,
       h('div', { class: 'btn-row' },
         h('button', { class: 'btn btn-primary btn-small', type: 'submit' }, 'Save'),
         h('button', { class: 'btn btn-secondary btn-small', type: 'button', onclick: () => { editing = null; render(); } }, 'Cancel')));
     return onSubmit(form, async (f, el) => {
-      const row = { full_name: f.full_name.trim(), email: f.email.trim().toLowerCase(), phone: blank(f.phone), role: f.role, can_log_in: f.can_log_in === 'yes' };
+      const row = { full_name: f.full_name.trim(), email: f.email.trim().toLowerCase(), phone: blank(f.phone), role: f.role, can_log_in: f.can_log_in === 'yes', approved: f.approved === 'yes' };
       if (!row.full_name || !/^\S+@\S+\.\S+$/.test(row.email)) throw new Error('please enter a name and a valid email.');
       const saved = must(p.id ? await db.from('people').update(row).eq('id', p.id).select().single() : await db.from('people').insert(row).select().single());
       if (row.role === 'nanny') {
@@ -1213,14 +1296,26 @@
     panel.append(h('div', { class: 'btn-row' }, h('button', { class: 'btn btn-primary btn-small', type: 'button', onclick: () => { editing = { type: 'person' }; render(); } }, 'Add a person')),
       h('p', { class: 'small muted', style: 'margin:0' }, 'Only people on this list can log in. Add a nanny once they have passed vetting, and a family once they have booked.'));
     if (editing && editing.type === 'person') panel.append(personForm(editing.id && data.people[editing.id]));
+    const waiting = data.peopleList.filter(p => p.role === 'nanny' && p.approved === false);
+    if (waiting.length) {
+      panel.append(h('h2', {}, 'New nannies waiting for approval'),
+        h('p', { class: 'small muted', style: 'margin:0' }, 'They signed up on the website. Approve them once you have interviewed them and checked their documents. Until then they cannot be offered bookings.'),
+        table(['', 'Name', 'Email', 'Phone', 'Signed up', ''], waiting.map(p => h('tr', {},
+          h('td', {}, avatar(data.nannies[p.id] && data.nannies[p.id].photo_path, 40, p.full_name)),
+          h('td', {}, p.full_name, data.nannies[p.id] ? h('details', {}, h('summary', { class: 'small' }, 'View profile'), h('div', { style: 'margin-top:.6rem;min-width:280px' }, nannyProfileView(p, data.nannies[p.id], [], { showReviews: false }))) : null),
+          h('td', {}, p.email), h('td', {}, p.phone || ''), h('td', {}, new Date(p.created_at).toLocaleDateString('en-GB')),
+          h('td', {}, h('button', { class: 'btn btn-primary btn-small', type: 'button', onclick: () => {
+            if (confirm(`Approve ${p.full_name}? They will be able to receive booking offers.`)) act(async () => { must(await db.from('people').update({ approved: true }).eq('id', p.id)); }, `${p.full_name} is approved.`);
+          } }, 'Approve'))))));
+    }
     for (const [role, title] of [['nanny', 'Nannies'], ['family', 'Families'], ['admin', 'Admins']]) {
-      const list = data.peopleList.filter(p => p.role === role);
+      const list = data.peopleList.filter(p => p.role === role && p.approved !== false);
       if (!list.length) continue;
       panel.append(h('h2', {}, title), table(['', 'Name', 'Email', 'Phone', 'Logged in yet?', ''], list.map(p => {
         const prof = role === 'nanny' ? data.nannies[p.id] : role === 'family' ? data.families[p.id] : null;
         return h('tr', {},
           h('td', {}, avatar(prof && prof.photo_path, 40, p.full_name)),
-          h('td', {}, p.full_name, !p.can_log_in && h('div', { class: 'small muted' }, 'Login switched off')),
+          h('td', {}, p.full_name, !p.can_log_in && h('div', { class: 'small muted' }, 'Login switched off'), p.source === 'signup' && h('div', { class: 'small muted' }, 'Signed up on the website')),
           h('td', {}, p.email), h('td', {}, p.phone || ''), h('td', {}, p.user_id ? 'Yes' : 'Not yet'),
           h('td', {}, h('button', { class: 'link-btn', type: 'button', onclick: () => { editing = { type: 'person', id: p.id }; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); } }, 'Edit'),
             role === 'nanny' && prof ? h('details', {}, h('summary', { class: 'small' }, 'View profile'), h('div', { style: 'margin-top:.6rem;min-width:280px' }, nannyProfileView(p, prof, data.reviews.filter(r => r.nanny_id === p.id), { names: data.names }))) : null));
@@ -1276,7 +1371,7 @@
 
   const ADMIN_TABS = [
     { id: 'bookings', label: 'Bookings', render: adminBookings },
-    { id: 'people', label: 'People', render: adminPeople },
+    { id: 'people', label: 'People', render: adminPeople, count: () => data.peopleList.filter(p => p.role === 'nanny' && p.approved === false).length },
     { id: 'updates', label: 'Hours & notes', render: adminUpdates, count: () => data.updates.filter(u => !u.checked_by_admin_at).length },
     { id: 'reviews', label: 'Reviews', render: adminReviews, count: () => data.reviews.filter(r => !r.published_at).length },
     { id: 'availability', label: 'Availability', render: adminAvailability },
