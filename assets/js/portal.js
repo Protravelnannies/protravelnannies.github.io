@@ -126,11 +126,28 @@
     return 'Something went wrong: ' + m;
   }
 
+  // "Show password" tick box: reveals every password box in the same form
+  function showPasswordToggle() {
+    const box = h('input', { type: 'checkbox' });
+    box.addEventListener('change', () => {
+      box.closest('form').querySelectorAll('input[data-pw]').forEach(i => { i.type = box.checked ? 'text' : 'password'; });
+    });
+    return h('label', { class: 'show-pw' }, box, h('span', {}, 'Show password'));
+  }
+  function addShowPassword(form) {
+    const boxes = [...form.querySelectorAll('input[type=password]')];
+    if (!boxes.length) return;
+    boxes.forEach(i => { i.dataset.pw = ''; });
+    const last = boxes[boxes.length - 1];
+    (last.closest('.field') || last).after(showPasswordToggle());
+  }
+
   function passwordFields() {
     return [
-      field('New password', input('password', '', 'password', { autocomplete: 'new-password', required: true, minlength: MIN_PASSWORD }),
+      field('New password', input('password', '', 'password', { autocomplete: 'new-password', required: true, minlength: MIN_PASSWORD, 'data-pw': '' }),
         `At least ${MIN_PASSWORD} characters. A short phrase you'll remember works well.`),
-      field('Type it again', input('password2', '', 'password', { autocomplete: 'new-password', required: true }))
+      field('Type it again', input('password2', '', 'password', { autocomplete: 'new-password', required: true, 'data-pw': '' })),
+      showPasswordToggle()
     ];
   }
   function checkPassword(f) {
@@ -140,6 +157,8 @@
   }
 
   // ---------- Login page ----------
+
+  if (loginRoot || signupRoot) root.querySelectorAll('form').forEach(addShowPassword);
 
   if (loginRoot) {
     const forms = Object.fromEntries([...loginRoot.querySelectorAll('form[data-step]')].map(f => [f.dataset.step, f]));
