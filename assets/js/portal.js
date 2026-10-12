@@ -206,7 +206,7 @@
         } else if (/rate limit|security purposes|too many/i.test(error.message)) {
           say('Too many attempts. Please wait a few minutes and try again.', 'error');
         } else {
-          say("Sorry, we couldn't send the email: " + error.message, 'error');
+          say("Sorry, we couldn't send the email just now. Please try again in a few minutes, or email cameron@protravelnannies.com for help.", 'error');
         }
         return;
       }
@@ -267,6 +267,7 @@
       if (error) {
         say(/already registered|already exists/i.test(error.message) ? 'You already have an account with this email. Please log in instead.'
           : /rate limit|too many/i.test(error.message) ? 'Too many sign-ups right now. Please try again in a few minutes.'
+          : /sending confirmation email|sending.*email/i.test(error.message) ? "Sorry, we couldn't send your confirmation email just now. Please try again in a few minutes, or email cameron@protravelnannies.com and we'll set up your account."
           : /database error/i.test(error.message) ? "Sorry, we couldn't create your account. Please email cameron@protravelnannies.com and we'll set it up for you."
           : niceError(error), 'error');
         return;
