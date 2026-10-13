@@ -58,4 +58,4 @@ set file_size_limit = 10485760, allowed_mime_types = array['image/jpeg', 'image/
 where id = 'profiles';
 
 -- Copy this value into Apps Script > Project Settings > Script properties as SUPABASE_KEY
-select value as "SUPABASE_KEY (copy into Apps Script)" from private.settings where name = 'apps_script_key';
+select value as supabase_key from private.settings where name = 'apps_script_key';
