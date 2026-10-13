@@ -38,6 +38,9 @@
     return el;
   }
   const safeUrl = u => (/^https:\/\//i.test((u || '').trim()) ? u.trim() : null);
+  // Intro videos are links only (we don't store video files): Loom, YouTube, Vimeo or Google Drive
+  const VIDEO_HOSTS = /^https:\/\/([a-z0-9-]+\.)*(loom\.com|youtube\.com|youtu\.be|vimeo\.com|drive\.google\.com)(\/|$)/i;
+  const videoUrl = u => { const v = safeUrl(u); return v && VIDEO_HOSTS.test(v) ? v : null; };
   const pad = n => String(n).padStart(2, '0');
   const isoDate = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
   const today = isoDate(new Date());
@@ -511,8 +514,7 @@
   }
 
   function videoBlock(profile) {
-    if (profile.video_path && urls[profile.video_path]) return h('video', { class: 'profile-video', src: urls[profile.video_path], controls: true, preload: 'metadata', playsinline: true });
-    const link = safeUrl(profile.video_url);
+    const link = videoUrl(profile.video_url);
     return link ? h('a', { class: 'btn btn-secondary btn-small', href: link, target: '_blank', rel: 'noopener' }, 'Watch intro video') : null;
   }
 
@@ -568,12 +570,10 @@
   }
 
   async function uploadFile(file, kind, ownerId = me.id) {
-    const isImage = /^image\/(jpeg|png|webp)$/.test(file.type);
-    const isVideo = /^video\/(mp4|quicktime|webm)$/.test(file.type);
-    if (!isImage && !isVideo) throw new Error('please choose a JPG, PNG or WEBP photo, or an MP4 or MOV video.');
-    if (file.size > 50 * 1024 * 1024) throw new Error('that file is too big. Please choose one under 50 MB.');
-    const f = isImage ? await shrinkImage(file) : file;
-    const ext = (f.type.split('/')[1] || 'bin').replace('quicktime', 'mov').replace('jpeg', 'jpg');
+    if (!/^image\/(jpeg|png|webp)$/.test(file.type)) throw new Error('please choose a JPG, PNG or WEBP photo.');
+    const f = await shrinkImage(file);
+    if (f.size > 10 * 1024 * 1024) throw new Error('that photo is too big. Please choose one under 10 MB.');
+    const ext = (f.type.split('/')[1] || 'bin').replace('jpeg', 'jpg');
     const path = `${ownerId}/${kind}-${Date.now()}.${ext}`;
     must(await db.storage.from(BUCKET).upload(path, f, { contentType: f.type, upsert: false }));
     return path;
@@ -586,7 +586,7 @@
     inp.addEventListener('change', async () => {
       const file = inp.files && inp.files[0];
       if (!file) return;
-      say(/^video/.test(file.type) ? 'Uploading your video… this can take a minute.' : 'Uploading…');
+      say('Uploading…');
       try { await onFile(file); await refresh(); say('Uploaded.', 'ok'); } catch (err) { say(niceError(err), 'error'); }
       inp.value = '';
     });
@@ -630,7 +630,7 @@
       loadReviews([me.id])
     ]);
     const names = Object.fromEntries(people.map(p => [p.id, p.full_name]));
-    const paths = profile ? [profile.photo_path, profile.video_path, ...(profile.gallery_paths || [])] : [];
+    const paths = profile ? [profile.photo_path, ...(profile.gallery_paths || [])] : [];
     families.forEach(f => paths.push(f.photo_path));
     return { mine: byKey(mine, 'booking_id'), bookings, people: byKey(people), families: byKey(families, 'person_id'), children, updates, availability, profile, reviews, names, paths };
   }
@@ -730,7 +730,7 @@
   function nannyCompleteness() {
     const p = data.profile || {};
     return profileCompleteness([
-      ['profile photo', p.photo_path], ['headline', p.headline], ['bio', p.about], ['intro video', p.video_path || p.video_url],
+      ['profile photo', p.photo_path], ['headline', p.headline], ['bio', p.about], ['intro video', videoUrl(p.video_url)],
       ['experience', p.experience || p.experience_years != null], ['languages', p.languages], ['services', (p.services || []).length],
       ['age groups', (p.age_groups || []).length], ['photos', (p.gallery_paths || []).length]
     ]);
@@ -847,24 +847,17 @@
 
     // Video
     const vForm = h('form', { class: 'inline-form', style: 'margin-top:1rem' },
-      field('Or paste a YouTube or Vimeo link', input('video_url', p.video_url, 'url', { placeholder: 'https://' })),
+      field('Your Loom link (or YouTube / Vimeo)', input('video_url', p.video_url, 'url', { placeholder: 'https://www.loom.com/share/…' })),
       h('div', {}, h('button', { class: 'btn btn-secondary btn-small', type: 'submit' }, 'Save link')));
     onSubmit(vForm, async f => {
-      if (f.video_url && !safeUrl(f.video_url)) throw new Error('please paste a full link starting with https://');
-      must(await db.from('nanny_profiles').update({ video_url: safeUrl(f.video_url) }).eq('person_id', me.id));
+      if (f.video_url && !videoUrl(f.video_url)) throw new Error('please paste a Loom, YouTube, Vimeo or Google Drive link starting with https://');
+      must(await db.from('nanny_profiles').update({ video_url: videoUrl(f.video_url) }).eq('person_id', me.id));
     }, 'Video link saved.');
     panel.append(h('div', { class: 'card media-card' }, h('h3', {}, 'Intro video'),
-      h('p', { class: 'small muted' }, 'A 30 to 60 second hello: who you are, your experience, and what you love doing with children. Families love this. Max 50 MB (record in 720p on your phone).'),
+      h('p', { class: 'small muted' }, 'A 30 to 60 second hello: who you are, your experience, and what you love doing with children. Families love this.'),
+      h('p', { class: 'small muted' }, 'Easiest way: make a free account at ', h('a', { href: 'https://www.loom.com', target: '_blank', rel: 'noopener' }, 'loom.com'),
+        ', record your video, click "Share", copy the link and paste it below. A YouTube video set to "Unlisted" works too.'),
       videoBlock(p),
-      h('div', { class: 'btn-row', style: 'margin-top:.8rem' },
-        fileButton(p.video_path ? 'Replace video' : 'Upload video', 'video/mp4,video/quicktime,video/webm', async file => {
-          const path = await uploadFile(file, 'video');
-          must(await db.from('nanny_profiles').update({ video_path: path }).eq('person_id', me.id));
-          removeFiles([p.video_path]);
-        }),
-        p.video_path && h('button', { class: 'link-btn small', type: 'button', onclick: () => act(async () => {
-          must(await db.from('nanny_profiles').update({ video_path: null }).eq('person_id', me.id)); removeFiles([p.video_path]);
-        }, 'Video removed.') }, 'Remove video')),
       vForm));
 
     // Gallery
@@ -940,7 +933,7 @@
     ]);
     const names = Object.fromEntries(team.map(t => [t.nanny_id, t.full_name]));
     const paths = [profile && profile.photo_path];
-    nannies.forEach(n => paths.push(n.photo_path, n.video_path, ...(n.gallery_paths || [])));
+    nannies.forEach(n => paths.push(n.photo_path, ...(n.gallery_paths || [])));
     return { bookings, team, payments: byKey(payments, 'booking_id'), nannies: byKey(nannies, 'person_id'), updates, profile, children, reviews, names, paths };
   }
 
@@ -1139,7 +1132,7 @@
       db.from('reviews').select('*').order('created_at', { ascending: false }).then(must)
     ]);
     const paths = [];
-    nannies.forEach(n => paths.push(n.photo_path, n.video_path, ...(n.gallery_paths || [])));
+    nannies.forEach(n => paths.push(n.photo_path, ...(n.gallery_paths || [])));
     families.forEach(f => paths.push(f.photo_path));
     return {
       peopleList: people, people: byKey(people), names: Object.fromEntries(people.map(p => [p.id, p.full_name])),

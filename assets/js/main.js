@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const who = data.name || [data.first_name, data.last_name].filter(Boolean).join(' ');
           if (data.subject && who) data.subject += ' from ' + who;
           if (data.email) data.replyto = data.email;
-          // Booking form also adds the request to the Booking Tracker sheet (Apps Script web app, see booking-tracker/)
+          // Booking, apply and contact forms also post to the Booking Tracker Apps Script (see booking-tracker/), which adds a row and sends the branded thank-you email
           if (form.dataset.sheet) fetch(form.dataset.sheet, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) }).catch(() => {});
           const res = await fetch(endpoint, { method: 'POST', body: JSON.stringify(data), headers: { 'Content-Type': 'application/json', Accept: 'application/json' } });
           const json = await res.json().catch(() => ({}));

@@ -52,8 +52,8 @@ create table public.nanny_profiles (
   skills            text[] not null default '{}',
   photo_path        text,               -- file in the private "profiles" storage bucket
   gallery_paths     text[] not null default '{}',
-  video_path        text,
-  video_url         text,               -- or a YouTube / Vimeo link
+  video_path        text,               -- no longer used: videos are links only
+  video_url         text,               -- Loom / YouTube / Vimeo link
   checks            text[] not null default '{}',  -- admin only: verified badges
   updated_at        timestamptz not null default now()
 );
@@ -412,13 +412,13 @@ create policy "reviews: admin edits" on public.reviews for update to authenticat
 create policy "reviews: admin or author deletes unpublished" on public.reviews for delete to authenticated
   using (public.is_admin() or (family_id = public.my_person_id() and published_at is null));
 
--- ---------- Photo and video storage ----------
+-- ---------- Photo storage ----------
 -- Private bucket: files live in a folder named after the person's id, and are only
 -- shown (via short-lived links) to that person, admin, and people they're booked with.
 
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-values ('profiles', 'profiles', false, 52428800,
-        array['image/jpeg', 'image/png', 'image/webp', 'video/mp4', 'video/quicktime', 'video/webm'])
+values ('profiles', 'profiles', false, 10485760,
+        array['image/jpeg', 'image/png', 'image/webp'])  -- photos only: intro videos are Loom/YouTube links
 on conflict (id) do update set public = false, file_size_limit = excluded.file_size_limit, allowed_mime_types = excluded.allowed_mime_types;
 
 drop policy if exists "profiles: view" on storage.objects;
