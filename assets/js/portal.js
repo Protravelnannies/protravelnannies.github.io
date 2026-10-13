@@ -121,7 +121,7 @@
     if (/duplicate key.*ref/i.test(m)) return 'That booking reference is already used.';
     if (/duplicate key.*reviews/i.test(m)) return "You've already reviewed this nanny for this booking.";
     if (/row-level security|permission/i.test(m)) return "You don't have permission to do that.";
-    if (/exceeded the maximum allowed size|payload too large/i.test(m)) return 'That file is too big. Please choose one under 50 MB.';
+    if (/exceeded the maximum allowed size|payload too large/i.test(m)) return 'That file is too big. Please choose one under 10 MB.';
     if (/password should be|weak password/i.test(m)) return 'Please choose a stronger password: at least 10 characters, mixing letters and numbers.';
     if (/should be different from the old/i.test(m)) return 'Your new password must be different from your old one.';
     // Our own form checks: show them as plain instructions
@@ -696,7 +696,8 @@
       h('ol', { class: 'dots' },
         h('li', {}, h('button', { class: 'link-btn', type: 'button', onclick: () => goTo('profile') }, 'Complete your profile'), ': photo, intro video, bio and experience.'),
         h('li', {}, 'Send us your ', h('a', { href: 'apply.html' }, 'nanny application'), ' if you haven\'t already.'),
-        h('li', {}, 'We arrange a video interview, check your ID and references, and your sex-offence certificate.'),
+        h('li', {}, h('button', { class: 'link-btn', type: 'button', onclick: () => goTo('documents') }, 'Send us your documents'), ': ID, sex-offence certificate and any certificates.'),
+        h('li', {}, 'We arrange a video interview, check your documents and references.'),
         h('li', {}, "Once you're approved, you'll see booking offers here.")));
   }
 
@@ -914,8 +915,103 @@
     { id: 'calendar', label: 'My calendar', render: nannyAvailability },
     { id: 'earnings', label: 'Earnings', render: nannyEarnings },
     { id: 'profile', label: 'My profile', render: nannyProfile },
+    { id: 'documents', label: 'Documents', render: documentsPanel },
     { id: 'account', label: 'Account', render: accountPanel }
   ];
+
+  // ---------- Documents ----------
+  // Files go straight to a private Google Drive folder that only Cameron can open (via the
+  // Booking Tracker Apps Script, see booking-tracker/). Nothing is stored on the website.
+
+  const DOCS = {
+    nanny: {
+      types: ['ID or passport', 'Sex-offence certificate', 'First aid certificate', 'Qualifications', 'Self-employed (autónomo) registration', 'Other'],
+      needs: [
+        ['ID or passport', 'A clear photo of the photo page. We check it matches you on your video interview.'],
+        ['Sex-offence certificate', 'Required by law for anyone working with children. From Spain, plus your home country if you are not Spanish.'],
+        ['First aid certificate', 'Optional, but families love it, and it earns you a badge.'],
+        ['Qualifications', 'Childcare, teaching or nursing certificates, if you have them.'],
+        ['Self-employed (autónomo) registration', 'Once you are registered, so we can pay you.'],
+      ]
+    },
+    family: {
+      types: ['ID or passport (lead booker)', 'Signed booking agreement', 'Other'],
+      needs: [
+        ['ID or passport (lead booker)', 'A clear photo of the photo page of the person making the booking. Trust goes both ways: our nannies like to know who they are working for.'],
+        ['Signed booking agreement', 'When we send you one for your booking.'],
+        ['Anything else we ask for', 'For example written care instructions. Choose "Other".'],
+      ]
+    }
+  };
+  let myDocs = null; // what this person has sent, loaded from Drive when the tab opens
+
+  async function docsCall(body) {
+    if (!cfg.docsEndpoint) throw new Error('document uploads are not switched on yet. Please email cameron@protravelnannies.com.');
+    const { data: s } = await db.auth.getSession();
+    if (!s.session) throw new Error('please log in again.');
+    // text/plain keeps this a "simple" request, which Google Apps Script accepts from other websites
+    const res = await fetch(cfg.docsEndpoint, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ ...body, token: s.session.access_token }) });
+    const json = await res.json().catch(() => ({}));
+    if (!json.ok) throw new Error(json.error || 'that did not go through. Please try again.');
+    return json;
+  }
+
+  const fileToBase64 = file => new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(String(r.result).split(',')[1]);
+    r.onerror = () => reject(new Error('we could not read that file.'));
+    r.readAsDataURL(file);
+  });
+
+  function documentsPanel(panel) {
+    const info = DOCS[me.role];
+    panel.append(h('h2', {}, 'Documents'));
+    panel.append(h('div', { class: 'card' }, h('h3', {}, 'How sending documents works'),
+      h('ol', { class: 'dots' },
+        h('li', {}, 'Choose what you are sending, pick the file (a photo or PDF) and press Send.'),
+        h('li', {}, 'It goes straight to a private folder that only Cameron can open. It is never shown on your profile or to anyone else.'),
+        h('li', {}, me.role === 'nanny' ? 'We check it and add the matching verified badge to your profile.' : 'We check it and let you know if anything else is needed.'),
+        h('li', {}, 'You can see below what you have already sent.'))));
+    panel.append(h('div', { class: 'card' }, h('h3', {}, 'What we need from you'),
+      h('ul', { class: 'checks small' }, info.needs.map(([t, why]) => h('li', {}, h('strong', {}, t), ': ', why)))));
+
+    const fileInput = h('input', { type: 'file', name: 'file', required: true, accept: 'application/pdf,image/jpeg,image/png,image/webp,image/heic' });
+    const form = h('form', { class: 'form' },
+      field('What is it?', select('doc_type', info.types.map(t => [t, t]))),
+      field('File', fileInput, 'A photo or PDF, up to 10 MB. Make sure every corner and all the text is readable.'),
+      h('div', {}, h('button', { class: 'btn btn-primary', type: 'submit' }, 'Send securely')));
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      const file = fileInput.files && fileInput.files[0];
+      const btn = form.querySelector('[type=submit]');
+      try {
+        if (!file) throw new Error('please choose a file.');
+        if (!/^(application\/pdf|image\/(jpeg|png|webp|heic))$/.test(file.type)) throw new Error('please choose a PDF or a JPG, PNG or HEIC photo.');
+        btn.disabled = true;
+        say('Sending securely…');
+        const f = await shrinkImage(file, 2400);
+        if (f.size > 10 * 1024 * 1024) throw new Error('that file is too big. Please choose one under 10 MB.');
+        await docsCall({ action: 'upload_document', doc_type: form.doc_type.value, file_name: file.name, mime_type: f.type, data: await fileToBase64(f) });
+        myDocs = null;
+        render();
+        say('Sent. Thank you! Cameron will check it soon.', 'ok');
+      } catch (err) {
+        say(niceError(err), 'error');
+        btn.disabled = false;
+      }
+    });
+    panel.append(h('div', { class: 'card' }, h('h3', {}, 'Send a document'), form));
+
+    const sent = h('div', {}, h('p', { class: 'empty small' }, 'Loading…'));
+    panel.append(h('div', { class: 'card' }, h('h3', {}, 'What you have sent'), sent));
+    const showSent = () => sent.replaceChildren(myDocs.length
+      ? table(['Sent on', 'Document'], myDocs.map(d => h('tr', {}, h('td', {}, d.date), h('td', {}, d.type))))
+      : h('p', { class: 'empty small' }, 'Nothing yet.'));
+    if (myDocs) showSent();
+    else docsCall({ action: 'list_documents' }).then(r => { myDocs = r.documents || []; showSent(); })
+      .catch(err => sent.replaceChildren(h('p', { class: 'empty small' }, niceError(err))));
+  }
 
   // ---------- Family ----------
 
@@ -1112,6 +1208,7 @@
     { id: 'bookings', label: 'Bookings', render: familyBookings, count: () => toConfirm().length + reviewable().length },
     { id: 'payments', label: 'Payments', render: familyPayments },
     { id: 'family', label: 'Family profile', render: familyProfile },
+    { id: 'documents', label: 'Documents', render: documentsPanel },
     { id: 'account', label: 'Account', render: accountPanel }
   ];
 

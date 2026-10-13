@@ -2,5 +2,7 @@
 // Both values are safe to publish: the database rules decide what each person can see.
 window.PTN_PORTAL = {
   url: 'https://nhciqzarclwrgooilasf.supabase.co',
-  publishableKey: 'sb_publishable_4W_UHdWWLcr1RwJ5QJa80w_bhTMahN_' // the "anon" / "publishable" key, never the service_role / secret key
+  publishableKey: 'sb_publishable_4W_UHdWWLcr1RwJ5QJa80w_bhTMahN_', // the "anon" / "publishable" key, never the service_role / secret key
+  // Booking Tracker Apps Script: saves uploaded documents to Cameron's private Google Drive
+  docsEndpoint: 'https://script.google.com/macros/s/AKfycbw6Ju0GJo18rcTRX_Yn7TPyN5zg4b91tSeDtIvntGWgdAsgRi9jhKPjZlIRfZzcPYw/exec'
 };
