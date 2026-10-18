@@ -188,6 +188,7 @@ p { margin: 0 0 1.1em; }
 .flight-path { position: absolute; pointer-events: none; color: var(--sage); opacity: .55; }
 .flight-path.journey { opacity: 1; overflow: visible; }
 .flight-label { font-family: var(--display); font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; fill: var(--sage-deep); }
+@media (max-width: 900px) { .flight-dest { transform: translateX(-30px); } } /* phones: keep it on screen */
 
 /* Page hero (inner pages) */
 .page-hero { padding-block: clamp(3rem, 7vw, 5.5rem) clamp(2.5rem, 5vw, 4rem); border-bottom: 1px solid var(--line); background: linear-gradient(180deg, var(--cream) 0%, var(--blush-soft) 160%); }
