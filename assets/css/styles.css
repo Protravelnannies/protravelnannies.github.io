@@ -187,6 +187,7 @@ p { margin: 0 0 1.1em; }
 .hero-visual .logo-disc { width: 100%; border-radius: 50%; clip-path: circle(48.5%); box-shadow: 0 30px 80px -30px rgba(89, 101, 81, .35); }
 .flight-path { position: absolute; pointer-events: none; color: var(--sage); opacity: .55; }
 .flight-path.journey { opacity: 1; overflow: visible; }
+.flight-label { font-family: var(--display); font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; fill: var(--sage-deep); }
 
 /* Page hero (inner pages) */
 .page-hero { padding-block: clamp(3rem, 7vw, 5.5rem) clamp(2.5rem, 5vw, 4rem); border-bottom: 1px solid var(--line); background: linear-gradient(180deg, var(--cream) 0%, var(--blush-soft) 160%); }
