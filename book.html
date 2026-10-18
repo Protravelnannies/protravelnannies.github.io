@@ -13,6 +13,7 @@
 <link rel="icon" href="assets/img/logo-192.png">
 <link rel="stylesheet" href="assets/css/fonts.css">
 <link rel="stylesheet" href="assets/css/styles.css?v=7">
+<link rel="stylesheet" href="assets/css/portal.css?v=4">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -97,6 +98,12 @@
 
       <div>
         <!-- Requests go to Web3Forms (email) and to the Booking Tracker sheet (data-sheet, Apps Script web app in ../booking-tracker/). -->
+        <div class="card" data-form-gate="family">
+          <h2 style="font-size:1.5rem;margin-top:0">First, create your free account</h2>
+          <p>To send your childcare request, please create a free family account or log in. It only takes a minute, and afterwards you'll come straight back here with your details filled in. Your account keeps your requests, bookings and payments in one place.</p>
+          <div class="btn-row"><a class="btn btn-primary" href="signup.html?role=family&amp;next=book">Create a free account</a><a class="btn btn-secondary" href="login.html?next=book">Log in</a></div>
+        </div>
+        <div data-gate-content hidden>
         <form class="form" data-form data-success="book-success" data-endpoint="https://api.web3forms.com/submit" data-sheet="https://script.google.com/macros/s/AKfycbw6Ju0GJo18rcTRX_Yn7TPyN5zg4b91tSeDtIvntGWgdAsgRi9jhKPjZlIRfZzcPYw/exec">
               <input type="hidden" name="access_key" value="645b3551-d19e-4c80-a6a0-7ff355bc1f03">
               <input type="hidden" name="subject" value="New booking request">
@@ -310,6 +317,7 @@
           <p class="muted small">You won't pay anything until you've picked your nanny and confirmed the booking.</p>
           <a class="text-link" href="how-it-works.html">See how it works</a>
         </div>
+        </div>
       </div>
 
     </div>
@@ -396,5 +404,8 @@
 <!-- ============ /FOOTER ============ -->
 
 <script src="assets/js/main.js?v=5"></script>
+<script src="assets/js/vendor/supabase.js"></script>
+<script src="assets/js/portal-config.js?v=2"></script>
+<script src="assets/js/form-gate.js?v=1"></script>
 </body>
 </html>

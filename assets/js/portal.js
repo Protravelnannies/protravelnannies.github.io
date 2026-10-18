@@ -19,6 +19,18 @@
   }
   const db = window.supabase.createClient(cfg.url, cfg.publishableKey);
   const BUCKET = 'profiles';
+
+  // Pages that need an account (form-gate.js) send people here with ?next=book|apply.
+  // We remember it for a day, so it survives the confirm-email link, and the account
+  // page sends them back once they're logged in.
+  const NEXT_PAGES = { book: 'book.html', apply: 'apply.html' };
+  const nextParam = new URLSearchParams(location.search).get('next');
+  if (NEXT_PAGES[nextParam]) { try { localStorage.setItem('ptn-next', JSON.stringify({ page: nextParam, at: Date.now() })); } catch (e) {} }
+  function takeNextPage() {
+    let saved = null;
+    try { saved = JSON.parse(localStorage.getItem('ptn-next')); localStorage.removeItem('ptn-next'); } catch (e) {}
+    return saved && Date.now() - saved.at < 864e5 ? NEXT_PAGES[saved.page] : null;
+  }
   const MIN_PASSWORD = 10;
 
   // ---------- Small helpers ----------
@@ -237,7 +249,7 @@
   if (signupRoot) {
     const form = signupRoot.querySelector('form');
     const nannyNote = signupRoot.querySelector('.nanny-only');
-    const wanted = new URLSearchParams(location.search).get('role');
+    const wanted = new URLSearchParams(location.search).get('role') || { book: 'family', apply: 'nanny' }[nextParam];
     if (wanted === 'nanny' || wanted === 'family') form.querySelector(`input[name=role][value=${wanted}]`).checked = true;
     const syncRole = () => { nannyNote.hidden = !form.querySelector('input[name=role][value=nanny]').checked; };
     form.addEventListener('change', syncRole);
@@ -318,6 +330,8 @@
     }
     me = person;
     if (!(user.user_metadata && user.user_metadata.password_set)) { renderSetPassword(); return; }
+    const nextPage = takeNextPage();
+    if (nextPage) { location.replace(nextPage); return; }
     tabs = me.role === 'admin' ? ADMIN_TABS : me.role === 'nanny' ? NANNY_TABS : FAMILY_TABS;
     if (!tabs.some(t => t.id === activeTab)) activeTab = tabs[0].id;
     await refresh();
