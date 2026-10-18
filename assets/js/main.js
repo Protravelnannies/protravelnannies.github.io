@@ -158,3 +158,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // Footer year
   document.querySelectorAll('[data-year]').forEach(el => { el.textContent = new Date().getFullYear(); });
 });
+
+// Home page plane: rest by the logo instead of flying for people who turn off animations
+if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  document.querySelectorAll('.flight-plane').forEach(g => {
+    const motion = g.querySelector('animateMotion');
+    if (motion) motion.remove();
+    g.setAttribute('transform', g.dataset.rest);
+  });
+}
